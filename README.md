@@ -88,8 +88,8 @@ VirtualMachine vm = new();
 string? name;
 
 vm
-	.CSAction(() => Console.Write("Please enter your name: "));
-	.CSAction(() => name = Console.ReadLine());
+	.CSAction(() => Console.Write("Please enter your name: "))
+	.CSAction(() => name = Console.ReadLine())
 	.CSAction(() => Console.WriteLine($"Hello, {name}"));
 
 vm.Run();

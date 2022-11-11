@@ -109,17 +109,15 @@ int test = 0;
 vm
 	// The use of lambdas within the Switch statement is necessary to avoid premature evaluation of the test value
 	.Switch(() => test)
-		.Switch(() => test)
-			.Case(0)
-				.CSAction(() => Logger.Log($"  Case 0 triggered."))
-				.Break()
-			.Case(1)
-				.CSAction(() => Logger.Log($"  Case 1 triggered"))
-				.Break()
-			.Default()
-				.CSAction(() => Logger.Log($"  Default triggered : test = {test}"))
-				.Break()
-		.EndSwitch();
+		.Case(0)
+			.CSAction(() => Logger.Log($"  Case 0 triggered."))
+			.Break()
+		.Case(1)
+			.CSAction(() => Logger.Log($"  Case 1 triggered"))
+			.Break()
+		.Default()
+			.CSAction(() => Logger.Log($"  Default triggered : test = {test}"))
+			.Break()
 	.EndSwitch();
 
 for (test = 0; test < 3; test++)

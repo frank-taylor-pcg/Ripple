@@ -8,7 +8,7 @@ namespace Ripple.Keywords
 	/// </summary>
 	public class Else : BlockStatement
 	{
-		public Else(VirtualMachine vm, int lineNumber) : base(vm, lineNumber)
+		public Else(int lineNumber) : base(lineNumber)
 		{
 			Action = DoAction;
 		}

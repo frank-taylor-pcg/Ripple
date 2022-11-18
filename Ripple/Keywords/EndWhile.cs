@@ -5,7 +5,7 @@ namespace Ripple.Keywords
 {
 	public class EndWhile : BlockStatement
 	{
-		public EndWhile(VirtualMachine vm, int lineNumber) : base(vm, lineNumber)
+		public EndWhile(int lineNumber) : base(lineNumber)
 		{
 			Action = JumpToWhile;
 		}

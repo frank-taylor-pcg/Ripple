@@ -5,7 +5,7 @@ namespace Ripple.Keywords
 {
 	public class Default : BlockStatement
 	{
-		public Default(VirtualMachine vm, int lineNumber) : base(vm, lineNumber)
+		public Default(int lineNumber) : base(lineNumber)
 		{
 			Action = DoAction;
 		}

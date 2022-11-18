@@ -10,7 +10,7 @@ namespace Ripple.Keywords
 	{
 		public Func<bool> Condition { get; set; }
 
-		public If(VirtualMachine vm, Func<bool> condition, int lineNumber, string? expression) : base(vm, lineNumber, expression)
+		public If(Func<bool> condition, int lineNumber, string? expression) : base(lineNumber, expression)
 		{
 			Condition = condition;
 			Action = DoAction;

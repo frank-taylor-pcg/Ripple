@@ -4,7 +4,7 @@ namespace Ripple.Keywords
 {
 	public class Repeat : BlockStatement
 	{
-		public Repeat(VirtualMachine? vm, int lineNumber) : base(vm, lineNumber) { }
+		public Repeat(int lineNumber) : base(lineNumber) { }
 
 		public override bool IsValid() => Block!.IsValid;
 	}

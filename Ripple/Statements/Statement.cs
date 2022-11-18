@@ -14,18 +14,18 @@ namespace Ripple.Statements
 
 		public Action? Action { get; set; }
 
-		public Statement(VirtualMachine? vm, int lineNumber = -1, string? expression = null)
+		public Statement(int lineNumber = -1, string? expression = null)
 		{
-			VM = vm;
 			LineNumber = lineNumber;
 			Expression = expression;
 		}
 
-		public void Execute()
+		public void Execute(VirtualMachine vm)
 		{
+			VM = vm;
+
 			try
 			{
-				Guards.ThrowIfNull(VM);
 				if (!IsValid())
 				{
 					throw new InvalidStatementException(this);

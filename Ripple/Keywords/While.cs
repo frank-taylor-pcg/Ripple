@@ -7,7 +7,7 @@ namespace Ripple.Keywords
 	{
 		private readonly Func<bool>? Condition;
 
-		public While(VirtualMachine vm, Func<bool> func, int lineNumber, string? expression) : base(vm, lineNumber, expression)
+		public While(Func<bool> func, int lineNumber, string? expression) : base(lineNumber, expression)
 		{
 			Condition = func;
 			Action = EvaluateLoopCondition;

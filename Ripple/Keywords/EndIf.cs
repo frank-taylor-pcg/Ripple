@@ -7,7 +7,7 @@ namespace Ripple.Keywords
 	/// </summary>
 	public class EndIf : BlockStatement
 	{
-		public EndIf(VirtualMachine vm, int lineNumber) : base(vm, lineNumber) { }
+		public EndIf(int lineNumber) : base(lineNumber) { }
 
 		public override bool IsValid() => Block!.IsValid;
 	}

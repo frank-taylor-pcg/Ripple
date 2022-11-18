@@ -8,8 +8,8 @@ namespace Ripple.Keywords
 		private readonly Func<bool> Check;
 		public Action Iterator { get; private set; }
 
-		public For(VirtualMachine? vm, Func<bool> checkLambda, Action iteratorLambda, int lineNumber = -1, string? expression = null)
-			: base(vm, lineNumber, expression)
+		public For(Func<bool> checkLambda, Action iteratorLambda, int lineNumber = -1, string? expression = null)
+			: base(lineNumber, expression)
 		{
 			Check = checkLambda;
 			Iterator = iteratorLambda;

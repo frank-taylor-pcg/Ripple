@@ -7,7 +7,7 @@ namespace Ripple.Keywords
 	/// </summary>
 	public class EndSwitch : BlockStatement
 	{
-		public EndSwitch(VirtualMachine? vm, int lineNumber) : base(vm, lineNumber) { }
+		public EndSwitch(int lineNumber) : base(lineNumber) { }
 
 		public override bool IsValid() => Block!.IsValid;
 	}

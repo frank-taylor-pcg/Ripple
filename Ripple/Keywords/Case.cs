@@ -7,9 +7,8 @@ namespace Ripple.Keywords
 	{
 		private readonly object Value;
 
-		public Case(VirtualMachine vm, object value, int lineNumber, string? expression) : base(vm, lineNumber, expression)
+		public Case(object value, int lineNumber, string? expression) : base(lineNumber, expression)
 		{
-			VM = vm;
 			Value = value;
 			Expression = expression;
 			LineNumber = lineNumber;

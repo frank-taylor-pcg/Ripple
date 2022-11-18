@@ -4,7 +4,7 @@ namespace Ripple.Keywords
 {
 	public class EndFor : BlockStatement
 	{
-		public EndFor(VirtualMachine vm, int lineNumber) : base(vm, lineNumber)
+		public EndFor(int lineNumber) : base(lineNumber)
 		{
 			Action = JumpToFor;
 		}

@@ -6,7 +6,7 @@ namespace Ripple.Keywords
 	{
 		public readonly Func<object> Value;
 
-		public Switch(VirtualMachine vm, Func<object> getValue, int lineNumber, string? expression) : base(vm, lineNumber, expression)
+		public Switch(Func<object> getValue, int lineNumber, string? expression) : base(lineNumber, expression)
 		{
 			Value = getValue;
 		}

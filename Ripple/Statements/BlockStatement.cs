@@ -2,8 +2,8 @@
 {
 	public class BlockStatement : Statement
 	{
-		public BlockStatement(VirtualMachine? vm, int lineNumber = -1, string? expression = null)
-			: base(vm, lineNumber, expression)
+		public BlockStatement(int lineNumber = -1, string? expression = null)
+			: base(lineNumber, expression)
 		{ }
 
 		public Block? Block { get; set; }

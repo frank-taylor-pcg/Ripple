@@ -10,7 +10,7 @@ namespace Ripple.Keywords
 	{
 		public Func<bool> Condition { get; set; }
 
-		public ElseIf(VirtualMachine vm, Func<bool> condition, int lineNumber, string? expression) : base(vm, lineNumber, expression)
+		public ElseIf(Func<bool> condition, int lineNumber, string? expression) : base(lineNumber, expression)
 		{
 			Condition = condition;
 			Action = DoAction;

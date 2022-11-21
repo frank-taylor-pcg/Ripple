@@ -13,7 +13,12 @@
 			// Remove the extraneous bits from the name
 			string name = GetType().Name.Split('`')[0];
 
-			return $"[VM/C# {Address,3}/{LineNumber,4}] ({Block?.ID}): {name} {Expression}";
+			string? blockId = Block?.ID.ToString();
+
+			if (blockId != null)
+				blockId = blockId[^6..];
+
+			return $"[VM/C# {Address,3}/{LineNumber,4}] : {name} {Expression}    (Block ID: {blockId})";
 		}
 	}
 }

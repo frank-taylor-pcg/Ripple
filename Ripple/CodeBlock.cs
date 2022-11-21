@@ -29,14 +29,35 @@ namespace Ripple
 			statement.Address = Statements.Count - 1;
 		}
 
+		public string GetCodeListing()
+		{
+			StringBuilder sb = new();
+			foreach (Statement statement in Statements)
+			{
+				sb.AppendLine($"  {statement}");
+			}
+			return sb.ToString();
+		}
+
+		public string GetMemoryDump()
+		{
+			StringBuilder sb = new();
+			foreach (KeyValuePair<string, object> entry in (IDictionary<string, object>)Mem)
+			{
+				sb.AppendLine($"  {entry.Key} : {entry.Value}");
+			}
+			return sb.ToString();
+		}
+
 		public override string ToString()
 		{
 			StringBuilder sb = new();
 
-			foreach (Statement statement in Statements)
-			{
-				sb.AppendLine(statement.ToString());
-			}
+			sb.AppendLine("\nCode Listing:");
+			sb.AppendLine(GetCodeListing());
+
+			sb.AppendLine("Memory Dump:");
+			sb.AppendLine(GetMemoryDump());
 
 			return sb.ToString();
 		}

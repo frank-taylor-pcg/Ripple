@@ -1,109 +1,54 @@
 ﻿using Ripple;
 using RippleTest;
-using RippleTest.Tests;
 
-VirtualMachine vm = new();
+bool isInterrupted = false;
 
-void TestIfBlock()
+// Allows us to simulate a simple interrupt from a user keypress event
+bool GenerateInterruptFromUserInput()
 {
-	CodeBlock cb = TestPrograms.CreateIfTest();
-	List<string> fruits = new() { "apple", "orange", "banana", "stapler" };
-	vm.CodeBlock = cb;
-	foreach (string fruit in fruits)
+	if (Console.KeyAvailable)
 	{
-		vm.CodeBlock.Mem.Fruit = fruit;
-		vm.Run();
+		Console.ReadKey();
+		isInterrupted = !isInterrupted;
 	}
+	return isInterrupted;
 }
 
-void TestSwitchBlock()
+VirtualMachine vm = new()
 {
-	vm.CodeBlock = TestPrograms.CreateSwitchTest();
-	for (int i = 0; i < 10; i++)
-	{
-		vm.CodeBlock.Mem.Choice = i;
-		vm.Run();
-	}
-}
-
-void TestWhileBlock()
-{
-	vm.CodeBlock = TestPrograms.CreateWhileTest();
-	vm.Run();
-}
-
-void TestRepeatBlock()
-{
-	vm.CodeBlock = TestPrograms.CreateRepeatTest();
-	vm.Run();
-}
-
-void TestForLoop()
-{
-	vm.CodeBlock = TestPrograms.CreateForTest();
-	vm.Run();
-}
-
-void RunTest(Test test)
-{
-	Console.Clear();
-	Logger.Banner($"Performing [{test.Name}] test");
-	test.Action();
-}
-
-void DisplayMenu(List<Test> tests)
-{
-	Logger.Banner("Functionality tests:");
-	int index = 0;
-	foreach (Test test in tests)
-	{
-		Logger.Log($"  {index++}. {test.Name}");
-	}
-	Logger.Log($"  {index}. Quit");
-	Logger.Log($"Enter a number to select a test: ");
-}
-
-int? GetUserInput()
-{
-	string? input = Console.ReadLine();
-	if (int.TryParse(input, out int result))
-	{
-		return result;
-	}
-	return null;
-}
-
-void ProcessInput(int input, List<Test> tests)
-{
-	bool isValid = input >= 0 && input <= tests.Count;
-	if (isValid)
-	{
-		if (input < tests.Count)
-			RunTest(tests[input]);
-	}
-	else
-	{
-		Console.WriteLine($"Please enter an integer between 0 and {tests.Count}");
-	}
-}
+	Interrupt = GenerateInterruptFromUserInput
+};
 
 // The 'main' program
 List<Test> tests = new()
 {
-	new("If block", TestIfBlock),
-	new("Switch block", TestSwitchBlock),
-	new("While loop", TestWhileBlock),
-	new("Repeat-Until loop", TestRepeatBlock),
-	new("For loop", TestForLoop),
+	new("If block", TestFactory.TestIfBlock),
+	new("Switch block", TestFactory.TestSwitchBlock),
+	new("While loop", TestFactory.TestWhileBlock),
+	new("Repeat-Until loop", TestFactory.TestRepeatBlock),
+	new("For loop", TestFactory.TestForLoop),
+	new("Interrupt test", TestFactory.TestInterrupt),
 };
 
 int? userInput = null;
 while (userInput != tests.Count)
 {
-	DisplayMenu(tests);
-	userInput = GetUserInput();
+	TestFramework.DisplayMenu(tests);
+	userInput = TestFramework.GetUserInput();
 	if (userInput != null)
 	{
-		ProcessInput((int)userInput, tests);
+		TestFramework.ProcessUserInput((int)userInput, vm, tests);
 	}
 }
+
+/*
+Fixing chipper data issues
+Fixing chipper Ok to Mill errors (probably some kind of physical issue)
+Working on multi-cart, getting it ready for the "Don't switch o-plate on lims change" fix (or whatever that field is called)
+Helping Neal figure out how to use the HD tray control I wrote
+Keep getting pulled into meetings by Andrew Maddux (2 different ones this week, one that repeats daily...)
+Started multi-cart testing
+	found that UO1 is scanning the barcode on the cart itself (which it shouldn't) might be hardware (bad scanner ROI), might be software (bad position/offset calculation)
+	Also found out that WMS Prod doesn't have the code to support multi-cart yet.  Alvaro reached out to Matt Beard to fast-track his PR (with my endorsement that it worked when I tested against it) so we're waiting on that
+
+*/

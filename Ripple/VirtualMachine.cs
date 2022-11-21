@@ -22,6 +22,7 @@ namespace Ripple
 
 		private bool Continue = true;
 		private bool ShouldAdvanceProgramCounterThisCycle = true;
+		private bool ShouldDumpState = true;
 
 		public VirtualMachine(int tickDelay = 10, string name = "Ripple VM")
 		{
@@ -67,8 +68,13 @@ namespace Ripple
 
 			while (ProgramCounter < CodeBlock.Statements.Count && Continue)
 			{
-				if (HandleInterrupt()) return;
-				DoStep();
+				// Instead of exiting, should pause and allow for resuming
+				if (!HandleInterrupt())
+				{
+					ShouldDumpState = true;
+					DoStep();
+				}
+				// VM just cycles without doing anything if interrupted
 			}
 		}
 
@@ -94,29 +100,25 @@ namespace Ripple
 		private bool HandleInterrupt()
 		{
 			if (Interrupt is null || !Interrupt()) return false;
-
-			StringBuilder sb = new();
-
-			sb.AppendLine($"\nProcess interrupted. Current VM state:");
-			sb.AppendLine($"  Halted during execution of {CodeBlock!.Statements[ProgramCounter - 1]}");
-
-			Logger.Log(sb.ToString());
-
+			
+			if (ShouldDumpState)
+			{
+				ShouldDumpState = false;
+				DumpState();
+			}
 			return true;
 		}
 
-		public string ProgramAsString()
+		private void DumpState()
 		{
-			if (CodeBlock is null) return string.Empty;
-
 			StringBuilder sb = new();
 
-			foreach (Statement statement in CodeBlock!.Statements)
-			{
-				sb.AppendLine(statement.ToString());
-			}
+			sb.AppendLine($"\nProcess interrupted. Current VM state:");
+			sb.AppendLine($"  Halted during execution of {CodeBlock!.Statements[ProgramCounter]}");
+			if (CodeBlock is not null)
+				sb.AppendLine(CodeBlock.ToString());
 
-			return sb.ToString();
+			Logger.Log(sb.ToString());
 		}
 	}
 }

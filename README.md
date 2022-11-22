@@ -28,16 +28,17 @@ The language contains the following keywords:
 - ElseIf
 - EndDef (not yet implemented)
 - EndFor
+- EndForEach
 - EndIf
 - EndSwitch
 - EndWhile
 - For
+- ForEach
 - If
 - Repeat
 - Switch
 - Until
 - While
-
 
 ## Clear and Concise
 
@@ -45,38 +46,41 @@ By utilizing familiar syntax the learning curve for this should be fairly shallo
 
 ```csharp
 // This is valid Ripple code:
-vm
-	.If(() => 1 == 1)
-		.CSAction(() => Console.WriteLine("1 equals 1"))
-	.EndIf();
+CodeBlock cbValid = new();
 
+cbValid
+.If(() => 1 == 1)
+	.CSAction(() => Console.WriteLine("1 equals 1"))
+.EndIf();
+
+vm.CodeBlock = cbValid;
 vm.Run();
 
 // This in NOT and will throw a validation error for the opening If statement
-vm
-	.If(() => 1 == 1)
-		.CSAction(() => Console.WriteLine("1 equals 1"));
+CodeBlock cbInvalid = new();
 
+cbInvalid
+.If(() => 1 == 1)
+	.CSAction(() => Console.WriteLine("1 equals 1"));
+
+vm.CodeBlock = cbInvalid;
 vm.Run();
-
 ```
-
 
 ## Extensibility
 
-I'm still considering the best way to implement this. Currently each statement returns a reference to the VM so that they may be chained together, but all of the keywords are baked directly into the VM.  Adding new commands (i.e., domain-specific functions or keywords) can't be added without baking them into the VM as well.  I will need to think about this.
-
+New keywords and functionality are easy to add.  For each new keyword a class must be defined that derives from Statement or BlockStatement.  For simple Statements, definition of the action they perform is all that is required, but extra validation can be performed by overriding IsValid.  BlockStatements are more difficult.  At a minimum there must be two statements for any block.  The parent statement and the End statement.  The parent BlockStatement must implement the IBlockParent interface.  This interface exposes the ConstructBlock method which steps through the list of Statements in the CodeBlock and attempts to build a valid block.  If this fails, the code will not run and a CodeValidationException will be thrown.  Note that for new looping constructs, the LoopConstructor is available to simplify the construction and validation process.
 
 ## Robustness
 
-The first piece of this is that every command issued to the VM is wrapped in a try-catch.  This will ease a lot of the pain of development as error-handling is "baked in".  All exceptions are caught, wrapped in a special `RippleVMException` which supplies extra debugging information (C# line number, VM keyword and address, the actual C# expression in question), and then they are rethrown.  The hope is that the extra information will guide the developer to the specific piece of code that caused the issue.  As execution is deferred and programs can be loaded/unloaded (eventually) it may prove exceedingly difficult to debug without this information.
+The first piece of this is that every command issued to the VM is wrapped in a try-catch.  This will ease a lot of the pain of development as error-handling is "baked in".  All exceptions are caught, wrapped in a special `RippleVMException` which supplies extra debugging information (C# line number, VM keyword and address, the actual C# expression in question), and then they are rethrown.  The hope is that the extra information will guide the developer to the specific piece of code that caused the issue.  As execution is deferred and programs can be loaded/unloaded it may prove exceedingly difficult to debug without this information.
 
 The next component is the Validator.  This is a process that runs behind the scenes when you call VirtualMachine.Run().  It steps through the code you have written, similar to a compiler, and reports errors that it detected.  Sadly, I have not yet figured out how to tie this into the C# build pipeline and this validation can only be done at runtime.
 
 
 ## Interruptable and resumable
 
-The VM exposes a simple event that can be assigned for interrupting the VM's process flow.  Why would we do this?  The simplest example is if we're interacting with an external system that has a safety stop built in.  If we tie the VM's Interrupt event to a function monitoring the state of the safety stop, we can stop processing as soon as the stop has been triggered, preventing the software from attempting further operations, but without losing its state.  Once the safety stop is resolved, the system can be issued a Resume command and it can pick up where it left off.  _Note that this may not always be desirable and it may sometimes be better to restart or run a different process altogether._
+The VM exposes a simple event that can be assigned for interrupting the VM's process flow.  This allows us to interact with external processes that may need to be synchronized with the state of our program.  By interrupting our VM, we can essentially pause it until the point that the external connection is ready for it to continue.  _Note that this may not always be desirable and it may sometimes be better to restart or run a different process altogether._
 
 ## Examples
 
@@ -84,14 +88,15 @@ The following is a simple example of how to use Ripple:
 
 ```csharp
 VirtualMachine vm = new();
-
+CodeBlock cb = new();
 string? name;
 
-vm
-	.CSAction(() => Console.Write("Please enter your name: "))
-	.CSAction(() => name = Console.ReadLine())
-	.CSAction(() => Console.WriteLine($"Hello, {name}"));
+cb
+.CSAction(() => Console.Write("Please enter your name: "))
+.CSAction(() => name = Console.ReadLine())
+.CSAction(() => Console.WriteLine($"Hello, {name}"));
 
+vm.CodeBlock = cb;
 vm.Run();
 ```
 
@@ -101,24 +106,25 @@ The following example showcases a bit more of the languages functionality:
 
 ```csharp
 VirtualMachine vm = new();
-
-// Variables used by the VM must be declared and have a valid value assigned prior to being referenced in the VM
+CodeBlock cb = new();
 int test = 0;
 
 // Indentation isn't required, but can make reading your code easier
-vm
-	// The use of lambdas within the Switch statement is necessary to avoid premature evaluation of the test value
-	.Switch(() => test)
-		.Case(0)
-			.CSAction(() => Logger.Log($"  Case 0 triggered."))
-			.Break()
-		.Case(1)
-			.CSAction(() => Logger.Log($"  Case 1 triggered"))
-			.Break()
-		.Default()
-			.CSAction(() => Logger.Log($"  Default triggered : test = {test}"))
-			.Break()
-	.EndSwitch();
+cb
+// The use of lambdas within the Switch statement is necessary to avoid premature evaluation of the test value
+.Switch(() => test)
+	.Case(0)
+		.CSAction(() => Logger.Log($"  Case 0 triggered."))
+		.Break()
+	.Case(1)
+		.CSAction(() => Logger.Log($"  Case 1 triggered"))
+		.Break()
+	.Default()
+		.CSAction(() => Logger.Log($"  Default triggered : test = {test}"))
+		.Break()
+.EndSwitch();
+
+vm.CodeBlock = cb;
 
 for (test = 0; test < 3; test++)
 {
@@ -127,4 +133,40 @@ for (test = 0; test < 3; test++)
 }
 ```
 
-In this example, you can see how the state of the VM can be influenced by changes at the outer C# layer.
+In the above example, you can see how the state of the VM can be influenced by changes at the outer C# layer.  Sometimes though, we'll need to define a code segment that tracks its internal state.  Below we define a CodeBlock that defines a number of variables and then uses them in a pair of nested loops.  There is probably room for improvement here.  Currently to declare a variable you call the DeclareVariable function passing the variable name and it's starting value.  The initial value will allow the virtual machine to determine the data type.  To access the variables you must use the notation `<codeblock name>.Mem.<variable name>`.  This is possible by using the ExpandoObject class in the System.Dynamic namespace.  This gives us a great deal of flexibility, but comes at the cost of safety.  It is possible to reference a variable that has not yet been declared or to define new variables outside of the intended method.  Both of these could potentially cause issues.
+
+**Note that all variables are global to the current CodeBlock.**
+
+```csharp
+VirtualMachine vm = new();
+CodeBlock cb = new();
+
+cb
+.DeclareVariable("I", 0)
+.DeclareVariable("MaxIndex", 10)
+
+.DeclareVariable("C", 'a')
+.DeclareVariable("MaxCharIndex", 'd')
+
+.DeclareVariable("Line", string.Empty)
+
+.Repeat()
+
+	.CSAction(() => cb.Mem.Line = $"{cb.Mem.I} ")
+	.CSAction(() => cb.Mem.I = cb.Mem.I += 1)
+
+	.CSAction(() => cb.Mem.C = 'a')
+	.Repeat()
+		.CSAction(() => cb.Mem.Line += $"{cb.Mem.C} ")
+		.CSAction(() => cb.Mem.C = (char)(cb.Mem.C += 1))
+	.Until(() => cb.Mem.C! == cb.Mem.MaxCharIndex!)
+
+	.CSAction(() => Logger.Log(cb.Mem.Line))
+
+.Until(() => cb.Mem.I! == cb.Mem.MaxIndex!);
+
+vm.CodeBlock = cb;
+vm.Run();
+```
+
+For more examples in how to utilize Ripple, please examine the RippleTest application.

@@ -53,6 +53,7 @@ namespace Ripple
 
 		public void Run()
 		{
+			// TODO: Track the duration of each step and give alerts for slow running statements.
 			// TODO: Report to the user that a program needs to be loaded into the VM
 			if (CodeBlock is null) return;
 
@@ -74,7 +75,7 @@ namespace Ripple
 					ShouldDumpState = true;
 					DoStep();
 				}
-				// VM just cycles without doing anything if interrupted
+				// Else : VM just cycles without doing anything if interrupted. This is intentional.
 			}
 		}
 

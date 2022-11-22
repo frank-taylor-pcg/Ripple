@@ -1,12 +1,13 @@
 ﻿using Ripple.Exceptions;
 using Ripple.Statements;
+using Ripple.Validators;
 
 namespace Ripple.Keywords
 {
 	/// <summary>
 	/// The beginning condition of an If block
 	/// </summary>
-	public class If : BlockStatement
+	public class If : BlockStatement, IBlockParent
 	{
 		public Func<bool> Condition { get; set; }
 
@@ -47,6 +48,41 @@ namespace Ripple.Keywords
 			}
 
 			return $"Unknown error occurred when attempting to validate {this}";
+		}
+
+		public void ConstructBlock(List<Statement> statements, int startAddress)
+		{
+			if (statements[startAddress] is If @if)
+			{
+				int address = startAddress + 1;
+
+				// Once we encounter an Else we can't add any more ElseIf or Else statements for this block
+				bool endifExpected = false;
+
+				@if.Block = new() { Parent = @if };
+
+				while (address < statements.Count && !@if.Block.IsValid)
+				{
+					if (!endifExpected && statements[address] is ElseIf elseif)
+					{
+						@if.Block.AddJumpTarget(elseif);
+					}
+
+					if (!endifExpected && statements[address] is Else @else)
+					{
+						@if.Block.AddJumpTarget(@else);
+						endifExpected = true;
+					}
+
+					if (statements[address] is EndIf endif)
+					{
+						@if.Block.AddJumpTarget(endif);
+						@if.Block.IsValid = true;
+					}
+
+					address++;
+				}
+			}
 		}
 	}
 }

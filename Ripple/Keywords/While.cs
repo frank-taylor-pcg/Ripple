@@ -1,9 +1,10 @@
 ﻿using Ripple.Exceptions;
 using Ripple.Statements;
+using Ripple.Validators;
 
 namespace Ripple.Keywords
 {
-	public class While : BlockStatement
+	public class While : BlockStatement, IBlockParent
 	{
 		private readonly Func<bool>? Condition;
 
@@ -11,6 +12,11 @@ namespace Ripple.Keywords
 		{
 			Condition = func;
 			Action = EvaluateLoopCondition;
+		}
+
+		public void ConstructBlock(List<Statement> statements, int startAddress)
+		{
+			LoopConstructor.ConstructLoop(statements, startAddress, typeof(While), typeof(EndWhile));
 		}
 
 		private void EvaluateLoopCondition()

@@ -15,7 +15,7 @@ namespace Ripple.Keywords
 		public static DeclareVariable Create<T>(CodeBlock cb, string name, T value, int lineNumber = -1, string? expression = null)
 		{
 			DeclareVariable result = new(name, lineNumber, expression);
-			((IDictionary<string, object>)cb.Mem)[result.Name] = value;
+			cb.SetVariable(name, value);
 			return result;
 		}
 

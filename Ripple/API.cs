@@ -6,10 +6,16 @@ namespace Ripple
 {
 	public static class API
 	{
-		public static CodeBlock DeclareVariable<T>(this CodeBlock cb, string name, T? value, [CallerLineNumber] int lineNumber = -1, [CallerArgumentExpression("value")] string? expression = null)
+		public static CodeBlock DeclareVariable<T>(
+			this CodeBlock cb
+			, string name
+			, T? value
+			, [CallerLineNumber] int lineNumber = -1
+			, [CallerArgumentExpression("name")] string? nameExpression = null
+			, [CallerArgumentExpression("value")] string? valueExpression = null)
 		{
 			// Had to specify the namespace to make the compiler happy
-			cb.Add(Keywords.DeclareVariable.Create<T>(cb, name, value, lineNumber, expression));
+			cb.Add(Keywords.DeclareVariable.Create<T>(cb, name, value, lineNumber, $"{nameExpression} = {valueExpression}"));
 			return cb;
 		}
 
@@ -102,7 +108,6 @@ namespace Ripple
 		//	return cb;
 		//}
 
-		// This is going to get tricky -- how do I properly track VM variables and their scopes?
 		public static CodeBlock For(this CodeBlock cb,
 			Func<bool> checkLambda,
 			Action iteratorLambda,
@@ -118,6 +123,24 @@ namespace Ripple
 		public static CodeBlock EndFor(this CodeBlock cb, [CallerLineNumber] int lineNumber = -1)
 		{
 			cb.Add(new EndFor(lineNumber));
+			return cb;
+		}
+
+		public static CodeBlock ForEach(
+			this CodeBlock cb
+			, string variable
+			, IEnumerable<object> valueList
+			, [CallerLineNumber] int lineNumber = -1
+			, [CallerArgumentExpression("variable")] string? variableExpression = null
+			, [CallerArgumentExpression("valueList")] string? valueListExpression = null)
+		{
+			cb.Add(new ForEach(variable, valueList, lineNumber, $"{variableExpression} in {valueListExpression}"));
+			return cb;
+		}
+
+		public static CodeBlock EndForEach(this CodeBlock cb, [CallerLineNumber] int lineNumber = -1)
+		{
+			cb.Add(new EndForEach(lineNumber));
 			return cb;
 		}
 

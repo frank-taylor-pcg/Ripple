@@ -2,7 +2,7 @@
 
 namespace Ripple.Statements
 {
-	public class Statement
+	public abstract class Statement
 	{
 		public VirtualMachine? VM { get; set; }
 

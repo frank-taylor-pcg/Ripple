@@ -1,6 +1,6 @@
 ﻿namespace Ripple.Statements
 {
-	public class BlockStatement : Statement
+	public abstract class BlockStatement : Statement
 	{
 		public BlockStatement(int lineNumber = -1, string? expression = null)
 			: base(lineNumber, expression)

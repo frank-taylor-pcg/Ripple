@@ -1,9 +1,10 @@
 ﻿using Ripple.Exceptions;
 using Ripple.Statements;
+using Ripple.Validators;
 
 namespace Ripple.Keywords
 {
-	public class For : BlockStatement
+	public class For : BlockStatement, IBlockParent
 	{
 		private readonly Func<bool> Check;
 		public Action Iterator { get; private set; }
@@ -14,6 +15,11 @@ namespace Ripple.Keywords
 			Check = checkLambda;
 			Iterator = iteratorLambda;
 			Action = IterateRange;
+		}
+
+		public void ConstructBlock(List<Statement> statements, int startAddress)
+		{
+			LoopConstructor.ConstructLoop(statements, startAddress, typeof(For), typeof(EndFor));
 		}
 
 		private void IterateRange()

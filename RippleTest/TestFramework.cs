@@ -9,11 +9,11 @@ namespace RippleTest
 			Console.Clear();
 			Logger.Banner($"Performing [{test.Name}] test");
 			test.Action(vm);
+			Logger.Log();
 		}
 
 		internal static void DisplayMenu(List<Test> tests)
 		{
-			Logger.Log();
 			Logger.Banner("Functionality tests:");
 			int index = 0;
 			foreach (Test test in tests)

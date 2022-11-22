@@ -1,5 +1,5 @@
 ﻿using Ripple;
-using Ripple.Keywords;
+using RippleTest.ExampleLib;
 
 namespace RippleTest
 {
@@ -138,9 +138,35 @@ namespace RippleTest
 			cb
 			.DeclareVariable("I", 0)
 			.CSAction(() => Console.WriteLine("Press any key to interrupt this very long process"))
-			.For(() => cb.Mem.I < 500, () => cb.Mem.I++)
+			.For(() => cb.Mem.I < 100, () => cb.Mem.I++)
 					.CSAction(() => Console.Write("."))
 			.EndFor();
+
+			return cb;
+		}
+
+		public static CodeBlock CreateCustomLibraryTest()
+		{
+			CodeBlock cb = new();
+
+			cb
+			.DeclareVariable("Names", new List<string>() { "Frank", "Ripple", "World" })
+			.DeclareVariable("I", 0)
+
+			.Banner(() => "Performing the greetings")
+
+			.ForEach("Name", (IEnumerable<object>)cb.Mem.Names)
+				.WriteLine(() => $"Hello, {cb.Mem.Name}")
+			.EndForEach()
+
+			.Banner(() => "Saying goodbye")
+
+			.ForEach("Name", (IEnumerable<object>)cb.Mem.Names)
+				.WriteLine(() => $"Goodbye, {cb.Mem.Name}")
+			.EndForEach()
+
+			.Banner(() => "We said hello and goodbye to the following:")
+			.Iterate(Console.WriteLine, (IEnumerable<object>)cb.Mem.Names);
 
 			return cb;
 		}

@@ -11,6 +11,11 @@ namespace Ripple
 		public dynamic Mem = new ExpandoObject();
 		public List<Statement> Statements = new();
 
+		public void SetVariable<T>(string variableName, T value)
+		{
+			((IDictionary<string, object>)Mem)[variableName] = value;
+		}
+
 		public void Validate()
 		{
 			try
@@ -23,7 +28,7 @@ namespace Ripple
 			}
 		}
 
-		internal void Add(Statement statement)
+		public void Add(Statement statement)
 		{
 			Statements.Add(statement);
 			statement.Address = Statements.Count - 1;

@@ -6,10 +6,10 @@ namespace RippleTest
 	{
 		internal static void TestIfBlock(VirtualMachine vm)
 		{
-			// Running this multiple times to showcase that all conditional checks work.  The side-effect of this is that interrupting it only interrupts one iteration.
-			CodeBlock cb = CodeBlockFactory.CreateIfBlock();
+			// Running this multiple times to showcase that all conditional checks work.
+			// The side-effect of this is that interrupting it only interrupts one iteration.
 			List<string> fruits = new() { "apple", "orange", "banana", "stapler" };
-			vm.CodeBlock = cb;
+			vm.CodeBlock = CodeBlockFactory.CreateIfBlock();
 			foreach (string fruit in fruits)
 			{
 				vm.CodeBlock.Mem.Fruit = fruit;
@@ -19,6 +19,8 @@ namespace RippleTest
 
 		internal static void TestSwitchBlock(VirtualMachine vm)
 		{
+			// Running this multiple times to showcase that all conditional checks work.
+			// The side-effect of this is that interrupting it only interrupts one iteration.
 			vm.CodeBlock = CodeBlockFactory.CreateSwitchBlock();
 			for (int i = 0; i < 10; i++)
 			{
@@ -48,6 +50,12 @@ namespace RippleTest
 		internal static void TestInterrupt(VirtualMachine vm)
 		{
 			vm.CodeBlock = CodeBlockFactory.CreateLongRunningProcess();
+			vm.Run();
+		}
+
+		internal static void TestCustomLibrary(VirtualMachine vm)
+		{
+			vm.CodeBlock = CodeBlockFactory.CreateCustomLibraryTest();
 			vm.Run();
 		}
 	}

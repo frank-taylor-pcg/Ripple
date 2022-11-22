@@ -1,7 +1,5 @@
 ﻿using Ripple.Exceptions;
-using Ripple.Keywords;
 using Ripple.Statements;
-using System.Xml.Linq;
 
 namespace Ripple.Validators
 {

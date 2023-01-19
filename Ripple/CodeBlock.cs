@@ -7,6 +7,12 @@ namespace Ripple
 {
 	public class CodeBlock
 	{
+		/// <summary>
+		/// If this value is true, the code validation will throw an exception if a CodeBlock variable is used, but not created
+		/// via the DeclareVariable command
+		/// </summary>
+		public bool UseExplicitVariableDeclarations { get; set; } = true;
+
 		// I'm not happy about using a dynamic here, but I can't think of a cleaner way to accomplish this
 		public dynamic Mem = new ExpandoObject();
 		public List<Statement> Statements = new();
@@ -20,7 +26,7 @@ namespace Ripple
 		{
 			try
 			{
-				BlockValidator.Validate(Statements);
+				BlockValidator.Validate(this);
 			}
 			catch (Exception ex)
 			{

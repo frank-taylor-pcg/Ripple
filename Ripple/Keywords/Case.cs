@@ -19,25 +19,26 @@ namespace Ripple.Keywords
 		{
 			Guards.ThrowIfNull(Block);
 
-			// First we have to ensure that the parent statement is a switch statement
-			if (Block!.Parent is Switch @switch)
+			if (Block!.Parent is not Switch @switch)
 			{
-				// If the current value matches the parent's check value, then the block is resolved
-				if (Value!.Equals(@switch.Value()))
-				{
-					Block.Resolved = true;
-					return;
-				}
-
-				// If the block has been resolved, then we're falling through multiple cases and should
-				// fall through this one as well
-				if (Block.Resolved) return;
-
-				int index = Block.JumpTargets.IndexOf(Address);
-				// TODO: This could throw an exception (it shouldn't, but it could)
-				int jumpAddress = Block.JumpTargets[index + 1];
-				VM!.JumpTo(jumpAddress);
+				return;
 			}
+
+			// If the current value matches the parent's check value, then the block is resolved
+			if (Value!.Equals(@switch.Value()))
+			{
+				Block.Resolved = true;
+				return;
+			}
+
+			// If the block has been resolved, then we're falling through multiple cases and should
+			// fall through this one as well
+			if (Block.Resolved) return;
+
+			int index = Block.JumpTargets.IndexOf(Address);
+			// TODO: This could throw an exception (it shouldn't, but it could)
+			int jumpAddress = Block.JumpTargets[index + 1];
+			VM!.JumpTo(jumpAddress);
 		}
 	}
 }

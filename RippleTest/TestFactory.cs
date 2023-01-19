@@ -53,6 +53,13 @@ namespace RippleTest
 			vm.Run();
 		}
 
+		internal static void TestUndeclaredVariable(VirtualMachine vm)
+		{
+			vm.CodeBlock = CodeBlockFactory.CreateUndeclaredVariableTest();
+			vm.CodeBlock.UseExplicitVariableDeclarations = false;
+			vm.Run();
+		}
+
 		internal static void TestCustomLibrary(VirtualMachine vm)
 		{
 			vm.CodeBlock = CodeBlockFactory.CreateCustomLibraryTest();

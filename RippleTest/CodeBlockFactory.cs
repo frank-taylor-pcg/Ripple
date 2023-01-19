@@ -152,6 +152,7 @@ namespace RippleTest
 			cb
 			.DeclareVariable("Names", new List<string>() { "Frank", "Ripple", "World" })
 			.DeclareVariable("I", 0)
+			.DeclareVariable("Name", string.Empty)
 
 			.Banner(() => "Performing the greetings")
 
@@ -167,6 +168,18 @@ namespace RippleTest
 
 			.Banner(() => "We said hello and goodbye to the following:")
 			.Iterate(Console.WriteLine, (IEnumerable<object>)cb.Mem.Names);
+
+			return cb;
+		}
+
+		public static CodeBlock CreateUndeclaredVariableTest()
+		{
+			CodeBlock cb = new();
+
+			cb
+			.CSAction(() => cb.Mem.MyUndeclaredVariable = 20)
+			.CSAction(() => Console.WriteLine($"Developer opted to allow implicit variable usage."))
+			.CSAction(() => Console.WriteLine($"The value of MyUndeclaredVariable is {cb.Mem.MyUndeclaredVariable}"));
 
 			return cb;
 		}

@@ -52,36 +52,36 @@ namespace Ripple.Keywords
 
 		public void ConstructBlock(List<Statement> statements, int startAddress)
 		{
-			if (statements[startAddress] is If @if)
+			// Do nothing if the statement isn't an IF statement
+			if (statements[startAddress] is not If @if) return;
+
+			int address = startAddress + 1;
+
+			// Once we encounter an Else we can't add any more ElseIf or Else statements for this block
+			bool endifExpected = false;
+
+			@if.Block = new() { Parent = @if };
+
+			while (address < statements.Count && !@if.Block.IsValid)
 			{
-				int address = startAddress + 1;
-
-				// Once we encounter an Else we can't add any more ElseIf or Else statements for this block
-				bool endifExpected = false;
-
-				@if.Block = new() { Parent = @if };
-
-				while (address < statements.Count && !@if.Block.IsValid)
+				if (!endifExpected && statements[address] is ElseIf elseif)
 				{
-					if (!endifExpected && statements[address] is ElseIf elseif)
-					{
-						@if.Block.AddJumpTarget(elseif);
-					}
-
-					if (!endifExpected && statements[address] is Else @else)
-					{
-						@if.Block.AddJumpTarget(@else);
-						endifExpected = true;
-					}
-
-					if (statements[address] is EndIf endif)
-					{
-						@if.Block.AddJumpTarget(endif);
-						@if.Block.IsValid = true;
-					}
-
-					address++;
+					@if.Block.AddJumpTarget(elseif);
 				}
+
+				if (!endifExpected && statements[address] is Else @else)
+				{
+					@if.Block.AddJumpTarget(@else);
+					endifExpected = true;
+				}
+
+				if (statements[address] is EndIf endif)
+				{
+					@if.Block.AddJumpTarget(endif);
+					@if.Block.IsValid = true;
+				}
+
+				address++;
 			}
 		}
 	}

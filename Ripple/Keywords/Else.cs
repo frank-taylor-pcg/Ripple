@@ -17,12 +17,12 @@ namespace Ripple.Keywords
 		{
 			Guards.ThrowIfNull(Block);
 
-			// If the block is already resolved jump to the final jump-target which should be an ENDIF
-			if (Block!.Resolved)
-			{
-				int jumpAddress = Block!.JumpTargets.Last();
-				VM!.JumpTo(jumpAddress);
-			}
+			// If the block is not resolved then this statement just falls through
+			if (!Block!.Resolved) return;
+
+			// Otherwise, jump to the final jump-target which should be an ENDIF
+			int jumpAddress = Block!.JumpTargets.Last();
+			VM!.JumpTo(jumpAddress);
 		}
 
 		public override bool IsValid() => Block!.IsValid;

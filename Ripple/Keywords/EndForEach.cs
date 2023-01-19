@@ -1,5 +1,4 @@
-﻿using Ripple.Keywords;
-using Ripple.Statements;
+﻿using Ripple.Statements;
 
 namespace Ripple.Keywords
 {

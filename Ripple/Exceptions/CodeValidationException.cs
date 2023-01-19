@@ -7,6 +7,8 @@ namespace Ripple.Exceptions
 		public CodeValidationException(List<string> errors)
 			: base(CreateErrorMessage(errors)) { }
 
+		public CodeValidationException(string message) : base(message) { }
+
 		private static string CreateErrorMessage(List<string> errors)
 		{
 			StringBuilder sb = new();

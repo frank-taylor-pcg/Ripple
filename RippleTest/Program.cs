@@ -28,6 +28,7 @@ List<Test> tests = new()
 	new("Repeat-Until loop", TestFactory.TestRepeatBlock),
 	new("For loop", TestFactory.TestForLoop),
 	new("Interrupt test", TestFactory.TestInterrupt),
+	new("Undeclared variable test", TestFactory.TestUndeclaredVariable),
 	new("Custom library test", TestFactory.TestCustomLibrary),
 };
 

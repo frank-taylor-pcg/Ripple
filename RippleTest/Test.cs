@@ -1,15 +1,14 @@
 ﻿using Ripple;
 
-namespace RippleTest
+namespace RippleTest;
+
+internal class Test
 {
-	internal class Test
+	public string Name { get; set; }
+	public Action<VirtualMachine> Action { get; set; }
+	public Test(string name, Action<VirtualMachine> action)
 	{
-		public string Name { get; set; }
-		public Action<VirtualMachine> Action { get; set; }
-		public Test(string name, Action<VirtualMachine> action)
-		{
-			Name = name;
-			Action = action;
-		}
+		Name = name;
+		Action = action;
 	}
 }

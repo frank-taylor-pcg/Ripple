@@ -1,14 +1,13 @@
-﻿namespace Ripple.Statements
-{
-	public class Argument
-	{
-		public string Name { get; set; }
-		public Type Type { get; set; }
+﻿namespace Ripple.Statements;
 
-		public Argument(string name, Type type)
-		{
-			Name = name;
-			Type = type;
-		}
+public abstract class Argument
+{
+	public string Name { get; set; }
+	public Type Type { get; set; }
+
+	protected Argument(string name, Type type)
+	{
+		Name = name ?? throw new ArgumentNullException(nameof(name));
+		Type = type ?? throw new ArgumentNullException(nameof(type));
 	}
 }

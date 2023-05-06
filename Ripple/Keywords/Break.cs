@@ -1,23 +1,22 @@
 ﻿using Ripple.Exceptions;
 using Ripple.Statements;
 
-namespace Ripple.Keywords
+namespace Ripple.Keywords;
+
+public class Break : BlockStatement
 {
-	public class Break : BlockStatement
+	public Break(int lineNumber) : base(lineNumber)
 	{
-		public Break(int lineNumber) : base(lineNumber)
-		{
-			Action = JumpToEnd;
-		}
+		Action = JumpToEnd;
+	}
 
-		private void JumpToEnd()
-		{
-			Guards.ThrowIfNull(Block);
+	private void JumpToEnd()
+	{
+		Guards.ThrowIfNull(Block);
 
-			// Break statements mark the current block as resolved and jump to the End statement
-			Block!.Resolved = true;
-			int jumpAddress = Block.JumpTargets.Last();
-			VM!.JumpTo(jumpAddress);
-		}
+		// Break statements mark the current block as resolved and jump to the End statement
+		Block!.Resolved = true;
+		int jumpAddress = Block.JumpTargets.Last();
+		Vm!.JumpTo(jumpAddress);
 	}
 }

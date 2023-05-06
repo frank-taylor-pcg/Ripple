@@ -6,11 +6,10 @@ bool isInterrupted = false;
 // Allows us to simulate a simple interrupt from a user keypress event
 bool GenerateInterruptFromUserInput()
 {
-	if (Console.KeyAvailable)
-	{
-		Console.ReadKey();
-		isInterrupted = !isInterrupted;
-	}
+	if (!Console.KeyAvailable) return isInterrupted;
+	
+	Console.ReadKey();
+	isInterrupted = !isInterrupted;
 	return isInterrupted;
 }
 
@@ -22,14 +21,14 @@ VirtualMachine vm = new()
 // The 'main' program
 List<Test> tests = new()
 {
-	new("If block", TestFactory.TestIfBlock),
-	new("Switch block", TestFactory.TestSwitchBlock),
-	new("While loop", TestFactory.TestWhileBlock),
-	new("Repeat-Until loop", TestFactory.TestRepeatBlock),
-	new("For loop", TestFactory.TestForLoop),
-	new("Interrupt test", TestFactory.TestInterrupt),
-	new("Undeclared variable test", TestFactory.TestUndeclaredVariable),
-	new("Custom library test", TestFactory.TestCustomLibrary),
+	new Test("If block", TestFactory.TestIfBlock),
+	new Test("Switch block", TestFactory.TestSwitchBlock),
+	new Test("While loop", TestFactory.TestWhileBlock),
+	new Test("Repeat-Until loop", TestFactory.TestRepeatBlock),
+	new Test("For loop", TestFactory.TestForLoop),
+	new Test("Interrupt test", TestFactory.TestInterrupt),
+	new Test("Undeclared variable test", TestFactory.TestUndeclaredVariable),
+	new Test("Custom library test", TestFactory.TestCustomLibrary)
 };
 
 int? userInput = null;

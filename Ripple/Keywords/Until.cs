@@ -1,31 +1,30 @@
 ﻿using Ripple.Exceptions;
 using Ripple.Statements;
 
-namespace Ripple.Keywords
+namespace Ripple.Keywords;
+
+public class Until : BlockStatement
 {
-	public class Until : BlockStatement
+	private readonly Func<bool> _condition;
+
+	public Until(Func<bool> func, int lineNumber, string? expression) : base(lineNumber, expression)
 	{
-		private readonly Func<bool> Condition;
+		_condition = func;
+		Action = EvaluateLoopCondition;
+	}
 
-		public Until(Func<bool> func, int lineNumber, string? expression) : base(lineNumber, expression)
+	private void EvaluateLoopCondition()
+	{
+		Guards.ThrowIfNull(Block);
+
+		// If the loop condition is false, mark the block as resolved and fall through
+		if (_condition())
 		{
-			Condition = func;
-			Action = EvaluateLoopCondition;
+			Block!.Resolved = true;
+			return;
 		}
 
-		private void EvaluateLoopCondition()
-		{
-			Guards.ThrowIfNull(Block);
-
-			// If the loop condition is false, mark the block as resolved and fall through
-			if (Condition())
-			{
-				Block!.Resolved = true;
-				return;
-			}
-
-			int jumpAddress = Block!.Parent!.Address;
-			VM!.JumpTo(jumpAddress);
-		}
+		int jumpAddress = Block!.Parent!.Address;
+		Vm!.JumpTo(jumpAddress);
 	}
 }

@@ -1,0 +1,76 @@
+﻿@using RippleTestBlazor.Components
+@using MVVM
+@using Ripple
+@using ViewModels
+@using System.Diagnostics
+
+@page "/simple_tests"
+@inherits View<SimpleTestViewModel>
+
+<h3>SimpleTests</h3>
+
+<button @onclick="TestIfBlock">Test If block</button>
+<button @onclick="TestSwitchBlock">Test Switch block</button>
+<button @onclick="TestWhileLoop">Test While loop</button>
+<button @onclick="TestRepeatLoop">Test Repeat-Until loop</button>
+<button @onclick="TestForLoop">Test For loop</button>
+<button @onclick="TestInterrupt">Test Interrupt / Resume</button>
+<button @onclick="TestUndeclaredVariables">Test Undeclared variable test</button>
+<button>Test Custom library test</button>
+
+<div>
+	<VirtualMachineView Machine=@_virtualMachine />
+</div>
+
+@if (_results.Any())
+{
+	<div class="row">
+		<div class="col-6">
+			<div class="card text-white bg-success">
+				<div class="card-header">Results</div>
+				<div class="card-body">
+					<table class="table table-striped">
+						<tbody>
+						@foreach (string result in _results)
+						{
+							<tr><td>@result</td></tr>
+						}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+@code {
+	readonly VirtualMachine _virtualMachine = new();
+	readonly List<string> _results = new();
+}
+
+@functions {
+
+	void Log(string msg)
+	{
+		_results.Add(msg);
+		Debug.WriteLine(msg);
+		StateHasChanged();
+	}
+
+	void DoTest(Func<Action<string>, CodeBlock> test)
+	{
+		_virtualMachine.CodeBlock = test(Log);
+		// I feel like this should be automatic when CodeBlock has been assigned...
+		_virtualMachine.Reset();
+		_results.Clear();
+		StateHasChanged();
+	}
+
+	void TestIfBlock() => DoTest(CodeBlockFactory.CreateIfBlock);
+	void TestSwitchBlock() => DoTest(CodeBlockFactory.CreateSwitchBlock);
+	void TestWhileLoop() => DoTest(CodeBlockFactory.CreateWhileBlock);
+	void TestRepeatLoop() => DoTest(CodeBlockFactory.CreateRepeatBlock);
+	void TestForLoop() => DoTest(CodeBlockFactory.CreateForBlock);
+	void TestInterrupt() => DoTest(CodeBlockFactory.CreateLongRunningProcess);
+	void TestUndeclaredVariables() => DoTest(CodeBlockFactory.CreateUndeclaredVariableTest);
+}

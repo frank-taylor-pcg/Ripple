@@ -1,38 +1,37 @@
 ﻿using Ripple.Statements;
 using Ripple.Validators;
 
-namespace Ripple.Keywords
+namespace Ripple.Keywords;
+
+public class ForEach : BlockStatement, IBlockParent
 {
-	public class ForEach : BlockStatement, IBlockParent
+	private int _index;
+	private readonly IEnumerable<object> _values;
+	private readonly string _variable;
+
+	public ForEach(string variableName, IEnumerable<object> enumerable, int lineNumber = -1, string? expression = null)
+		: base(lineNumber, expression)
 	{
-		private int index = 0;
-		private readonly IEnumerable<object> values;
-		private readonly string variable;
+		_variable = variableName;
+		_values = enumerable;
+		Action = NextValue;
+	}
 
-		public ForEach(string variableName, IEnumerable<object> enumerable, int lineNumber = -1, string? expression = null)
-			: base(lineNumber, expression)
-		{
-			variable = variableName;
-			values = enumerable;
-			Action = NextValue;
-		}
+	private void NextValue()
+	{
+		Vm!.CodeBlock!.SetVariable(_variable, _values.ToList()[_index]);
+	}
 
-		private void NextValue()
+	public void NextIndex()
+	{
+		if (++_index >= _values.Count())
 		{
-			VM!.CodeBlock!.SetVariable(variable, values.ToList()[index]);
+			Block!.Resolved = true;
 		}
+	}
 
-		public void NextIndex()
-		{
-			if (++index >= values.Count())
-			{
-				Block!.Resolved = true;
-			}
-		}
-
-		public void ConstructBlock(List<Statement> statements, int startAddress)
-		{
-			LoopConstructor.ConstructLoop(statements, startAddress, typeof(ForEach), typeof(EndForEach));
-		}
+	public void ConstructBlock(List<Statement> statements, int startAddress)
+	{
+		LoopConstructor.ConstructLoop(statements, startAddress, typeof(ForEach), typeof(EndForEach));
 	}
 }

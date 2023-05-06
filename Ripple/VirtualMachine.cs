@@ -1,125 +1,138 @@
-﻿using Ripple.Exceptions;
-using Ripple.Keywords;
-using Ripple.Statements;
-using Ripple.Validators;
-using System.Runtime.CompilerServices;
+﻿using System.Reflection.Metadata;
+using Ripple.Exceptions;
 using System.Text;
 
-namespace Ripple
+namespace Ripple;
+
+public class VirtualMachine
 {
-	public class VirtualMachine
-	{
-		public string Name { get; set; }
-		public int TickDelay { get; private set; }
-		public int ProgramCounter { get; private set; }
-		public bool Verbose { get; set; }
-		public object? Result { get; internal set; }
-		public bool CodeIsValid { get; set; } = false;
+  public string Name { get; set; }
+  public int TickDelay { get; private set; }
+  public int ProgramCounter { get; private set; }
+  public bool Verbose { get; set; }
+  public object? Result { get; internal set; }
+  public bool CodeIsValid { get; set; } = false;
 
-		public Func<bool>? Interrupt { get; set; }
+  public Func<bool>? Interrupt { get; set; }
 
-		public CodeBlock? CodeBlock { get; set; }
+  public CodeBlock? CodeBlock { get; set; }
 
-		private bool Continue = true;
-		private bool ShouldAdvanceProgramCounterThisCycle = true;
-		private bool ShouldDumpState = true;
+  private bool _continue = true;
+  private bool _shouldAdvanceProgramCounterThisCycle = true;
+  private bool _shouldDumpState = true;
 
-		public VirtualMachine(int tickDelay = 10, string name = "Ripple VM")
-		{
-			TickDelay = tickDelay;
-			Name = name;
-		}
+  public VirtualMachine(int tickDelay = 10, string name = "Ripple VM")
+  {
+    TickDelay = tickDelay;
+    Name = name;
+  }
 
-		public void JumpTo(int address)
-		{
-			ProgramCounter = address;
-			ShouldAdvanceProgramCounterThisCycle = false;
-		}
+  public void JumpTo(int address)
+  {
+    ProgramCounter = address;
+    _shouldAdvanceProgramCounterThisCycle = false;
+  }
 
-		private void Reset()
-		{
-			ProgramCounter = 0;
-			Continue = true;
-		}
+  public void Reset()
+  {
+    ProgramCounter = 0;
+    _continue = true;
+  }
 
-		private void AdvanceProgramCounter()
-		{
-			if (ShouldAdvanceProgramCounterThisCycle)
-			{
-				ProgramCounter++;
-			}
-			ShouldAdvanceProgramCounterThisCycle = true;
-		}
+  private void AdvanceProgramCounter()
+  {
+    if (_shouldAdvanceProgramCounterThisCycle)
+    {
+      ProgramCounter++;
+    }
 
-		public void Run()
-		{
-			// TODO: Track the duration of each step and give alerts for slow running statements.
-			// TODO: Report to the user that a program needs to be loaded into the VM
-			if (CodeBlock is null) return;
+    _shouldAdvanceProgramCounterThisCycle = true;
+  }
 
-			CodeBlock.Validate();
+  public void Run()
+  {
+    // TODO: Track the duration of each step and give alerts for slow running statements.
+    // TODO: Report to the user that a program needs to be loaded into the VM
+    if (CodeBlock is null) return;
 
-			//if (!CodeIsValid)
-			//{
-			//	System.Diagnostics.Debug.WriteLine($"Ripple can't run due to invalid code.  See previous debug messages for further details");
-			//	return;
-			//}
+    CodeBlock.Validate();
 
-			Reset();
+    //if (!CodeIsValid)
+    //{
+    //	System.Diagnostics.Debug.WriteLine($"Ripple can't run due to invalid code.  See previous debug messages for further details");
+    //	return;
+    //}
 
-			while (ProgramCounter < CodeBlock.Statements.Count && Continue)
-			{
-				// Instead of exiting, should pause and allow for resuming
-				if (!HandleInterrupt())
-				{
-					ShouldDumpState = true;
-					DoStep();
-				}
-				// Else : VM just cycles without doing anything if interrupted. This is intentional.
-			}
-		}
+    Reset();
 
-		private void DoStep()
-		{
-			try
-			{
-				if (Verbose)
-				{
-					Console.WriteLine($"{CodeBlock!.Statements[ProgramCounter]}");
-				}
-				CodeBlock!.Statements[ProgramCounter].Execute(this);
-				AdvanceProgramCounter();
-				Thread.Sleep(TickDelay);
-			}
-			catch (RippleException ex)
-			{
-				Continue = false;
-				System.Diagnostics.Debug.WriteLine(ex);
-			}
-		}
+    while (ProgramCounter < CodeBlock.Statements.Count && _continue)
+    {
+      // Instead of exiting, should pause and allow for resuming
+      // Else : VM just cycles without doing anything if interrupted. This is intentional.
 
-		private bool HandleInterrupt()
-		{
-			if (Interrupt is null || !Interrupt()) return false;
-			
-			if (ShouldDumpState)
-			{
-				ShouldDumpState = false;
-				DumpState();
-			}
-			return true;
-		}
+      if (HandleInterrupt()) continue;
+      _shouldDumpState = true;
+      DoStep();
+    }
+  }
+  
+  // Temporary until I think about the proper way to do this
+  public void Step()
+  {
+    if (CodeBlock is null) return;
+    if (ProgramCounter >= CodeBlock.Statements.Count) return;
+    if (HandleInterrupt()) return;
+    
+    if (ProgramCounter == 0)
+    {
+      CodeBlock.Validate();
+      Reset();
+      _shouldDumpState = true;
+    }
 
-		private void DumpState()
-		{
-			StringBuilder sb = new();
+    DoStep();
+  }
 
-			sb.AppendLine($"\nProcess interrupted. Current VM state:");
-			sb.AppendLine($"  Halted during execution of {CodeBlock!.Statements[ProgramCounter]}");
-			if (CodeBlock is not null)
-				sb.AppendLine(CodeBlock.ToString());
+  private void DoStep()
+  {
+    try
+    {
+      if (Verbose)
+      {
+        Console.WriteLine($"{CodeBlock!.Statements[ProgramCounter]}");
+      }
 
-			Logger.Log(sb.ToString());
-		}
-	}
+      CodeBlock!.Statements[ProgramCounter].Execute(this);
+      AdvanceProgramCounter();
+      Thread.Sleep(TickDelay);
+    }
+    catch (RippleException ex)
+    {
+      _continue = false;
+      System.Diagnostics.Debug.WriteLine(ex);
+    }
+  }
+
+  private bool HandleInterrupt()
+  {
+    if (Interrupt is null || !Interrupt()) return false;
+
+    if (!_shouldDumpState) return true;
+
+    _shouldDumpState = false;
+    DumpState();
+    return true;
+  }
+
+  private void DumpState()
+  {
+    StringBuilder sb = new();
+
+    sb.AppendLine("\nProcess interrupted. Current VM state:");
+    sb.AppendLine($"  Halted during execution of {CodeBlock!.Statements[ProgramCounter]}");
+    if (CodeBlock is not null)
+      sb.AppendLine(CodeBlock.ToString());
+
+    Logger.Log(sb.ToString());
+  }
 }

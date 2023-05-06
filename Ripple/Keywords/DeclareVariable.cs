@@ -1,23 +1,22 @@
 ﻿using Ripple.Statements;
 
-namespace Ripple.Keywords
+namespace Ripple.Keywords;
+
+internal class DeclareVariable : Statement
 {
-	internal class DeclareVariable : Statement
+	public string Name { get; private set; }
+
+	public DeclareVariable(string name, int lineNumber = -1, string? expression = null)
+		: base(lineNumber, expression)
 	{
-		public string Name { get; private set; }
-
-		public DeclareVariable(string name, int lineNumber = -1, string? expression = null)
-			: base(lineNumber, expression)
-		{
-			Name = name;
-		}
-
-		public static DeclareVariable Create<T>(CodeBlock cb, string name, T value, int lineNumber = -1, string? expression = null)
-		{
-			DeclareVariable result = new(name, lineNumber, expression);
-			cb.SetVariable(name, value);
-			return result;
-		}
-
+		Name = name;
 	}
+
+	public static DeclareVariable Create<T>(CodeBlock cb, string name, T? value, int lineNumber = -1, string? expression = null)
+	{
+		DeclareVariable result = new(name, lineNumber, expression);
+		cb.SetVariable(name, value);
+		return result;
+	}
+
 }

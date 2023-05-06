@@ -1,21 +1,19 @@
 ﻿using Ripple.Exceptions;
 using Ripple.Statements;
 
-namespace Ripple.Keywords
+namespace Ripple.Keywords;
+
+public class Default : BlockStatement
 {
-	public class Default : BlockStatement
+	public Default(int lineNumber) : base(lineNumber)
 	{
-		public Default(int lineNumber) : base(lineNumber)
-		{
-			Action = DoAction;
-		}
+		Action = DoAction;
+	}
 
-		private void DoAction()
-		{
-			Guards.ThrowIfNull(Block);
+	private void DoAction()
+	{
+		Guards.ThrowIfNull(Block);
 
-			Block!.Resolved = true;
-			return;
-		}
+		Block!.Resolved = true;
 	}
 }

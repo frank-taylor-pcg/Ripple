@@ -1,9 +1,8 @@
 ﻿using Ripple.Statements;
 
-namespace Ripple.Validators
+namespace Ripple.Validators;
+
+public interface IBlockParent
 {
-	public interface IBlockParent
-	{
-		void ConstructBlock(List<Statement> statements, int startAddress);
-	}
+	void ConstructBlock(List<Statement> statements, int startAddress);
 }

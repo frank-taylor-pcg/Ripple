@@ -1,0 +1,109 @@
+﻿@using Ripple.Statements
+@using Ripple
+
+<div class="card text-white mb-3">
+	<div class="card-header bg-danger">Debugger</div>
+	<div class="card-body row">
+		<div class="col-9">
+			<div class="card text-white">
+				<div class="card-header bg-info">
+					Code View
+				</div>
+				<div class="card-body">
+					<div class="alert alert-secondary">
+						<button class="btn btn-success oi oi-media-play @CanAdvance()" @onclick="Run"> Run</button>
+						<button class="btn btn-info oi oi-media-step-forward @CanAdvance()" @onclick="Step"> Step</button>
+            <button class="btn btn-warning oi oi-media-skip-backward @CanReset()" @onclick="Reset"> Reset</button>
+					</div>
+					<table class="table table-sm table-striped table-hover">
+						<thead>
+						<tr>
+							<th>Line</th>
+							<th>Expression</th>
+						</tr>
+						</thead>
+						<tbody>
+						@if (Machine?.CodeBlock is not null)
+						{
+							foreach (Statement statement in Machine.CodeBlock.Statements)
+							{
+								<tr class="@GetLineClass(statement.Address)">
+									<td>@statement.Address</td>
+									<td>@statement.GetName() @statement.Expression</td>
+								</tr>
+							}
+						}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-3">
+			<div class="card text-white">
+				<div class="card-header bg-warning">
+					Memory View
+				</div>
+				<div class="card-body">
+					<table class="table table-sm table-striped table-hover">
+						<thead>
+						<tr>
+							<th>Name</th>
+							<th>Value</th>
+						</tr>
+						</thead>
+						<tbody>
+						@if (Machine?.CodeBlock is not null)
+						{
+							foreach (KeyValuePair<string, object> entry in Machine.CodeBlock.Mem)
+							{
+								<tr>
+									<td>@entry.Key</td>
+									<td>@entry.Value</td>
+								</tr>
+							}
+						}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+
+	[Parameter]
+	public VirtualMachine? Machine { get; set; }
+
+}
+
+@functions {
+
+	void Run()
+	{
+		Machine?.Run();
+		StateHasChanged();
+	}
+
+	void Step()
+	{
+		Machine?.Step();
+		StateHasChanged();
+	}
+
+	void Reset()
+	{
+		// TODO: Reset doesn't reset variable declarations
+		Machine?.Reset();
+		StateHasChanged();
+	}
+	
+	string? GetLineClass(int address)
+	{
+		return Machine?.ProgramCounter == address ? "table-info" : null;
+	}
+
+	string? CanAdvance() => (Machine?.ProgramCounter < Machine?.CodeBlock?.Statements.Count) ? "" : "disabled";
+	string? CanReset() => (Machine?.ProgramCounter > 0) ? "" : "disabled";
+}
